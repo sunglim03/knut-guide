@@ -1,0 +1,6 @@
+# 로컬 전용 파일
+*.pyc
+__pycache__/
+.DS_Store
+Thumbs.db
+~$*
