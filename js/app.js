@@ -363,18 +363,22 @@
   var picking = false, pickPos = null, pickMarker = null;
   var configured = function () { return !!(CFG.formAction && CFG.entries && CFG.entries.name); };
 
-  $("btn-add").addEventListener("click", function () { hideHint(); if ($("add-sheet").hidden) openAdd(); else only(null); });
-  // 처음 온 학생에게 '맛집 제보' 버튼을 한 번 알려 주는 말풍선
-  var hintTimer;
-  function hideHint() { $("add-hint").hidden = true; clearTimeout(hintTimer); }
-  function maybeHint() {
-    var seen = false;
-    try { seen = localStorage.getItem("seenAddHint") === "1"; localStorage.setItem("seenAddHint", "1"); } catch (err) { /* 저장소 없음: 매번 보여 줌 */ }
-    if (seen) return;
-    $("add-hint").hidden = false;
-    hintTimer = setTimeout(hideHint, 6000);
+  $("btn-add").addEventListener("click", function () { hideHint(true); if ($("add-sheet").hidden) openAdd(); else only(null); });
+  // '맛집 제보' 버튼을 알려 주는 말풍선: 버튼을 한 번 누르기 전까지는 지도에 들어올 때마다 보여 준다
+  var hintTimer, HINT_KEY = "usedAddBtn";
+  function hideHint(used) {
+    $("add-hint").hidden = true;
+    clearTimeout(hintTimer);
+    if (used) { try { localStorage.setItem(HINT_KEY, "1"); } catch (err) { /* 저장소 없음 */ } }
   }
-  $("add-hint").addEventListener("click", hideHint);
+  function maybeHint() {
+    var used = false;
+    try { used = localStorage.getItem(HINT_KEY) === "1"; } catch (err) { /* 저장소 없음: 매번 보여 줌 */ }
+    if (used) return;
+    $("add-hint").hidden = false;
+    hintTimer = setTimeout(function () { hideHint(false); }, 8000);
+  }
+  $("add-hint").addEventListener("click", function () { hideHint(false); openAdd(); hideHint(true); });
   function openAdd() {
     closeDetail();
     only("add-sheet");
